@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://facelove.online/schemas/media-manifest.schema.json",
+  "title": "FaceLove Media Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "profile", "assets"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z0-9._-]+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "provider",
+          "externalId",
+          "mediaType",
+          "visibility"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": { "type": "string", "minLength": 1 },
+          "provider": {
+            "type": "string",
+            "enum": ["mega", "google_drive", "supabase", "cloudflare", "mux", "external"]
+          },
+          "externalId": { "type": "string", "minLength": 1 },
+          "mediaType": {
+            "type": "string",
+            "enum": ["image", "video"]
+          },
+          "mimeType": { "type": "string" },
+          "title": { "type": "string" },
+          "caption": { "type": "string" },
+          "width": { "type": "integer", "minimum": 1 },
+          "height": { "type": "integer", "minimum": 1 },
+          "durationSeconds": { "type": "number", "minimum": 0 },
+          "thumbnailReference": { "type": "string" },
+          "visibility": {
+            "type": "string",
+            "enum": ["public", "followers", "private", "access_link"]
+          },
+          "tags": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}
