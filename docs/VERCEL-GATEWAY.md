@@ -2,7 +2,7 @@
 
 ## O que é publicado
 
-Importar `mgjexpert/facelove-conteudo` como **segundo projeto Vercel** (Framework: Other, Root Directory: raiz, Install Command: `npm ci`, sem Build Command e sem Output Directory). Production Branch: `main`. `vercel.json` reescreve `/health`, `/v1/catalog` e `/v1/media/:key` para `api/gateway.mjs`, que reutiliza `src/http/gateway.mjs` e `src/providers/mega.mjs`. O endpoint público só entrega catálogo e media com `Authorization: Bearer <MEDIA_GATEWAY_TOKEN>`; `/health` confirma apenas a configuração, sem testar a leitura da origem.
+Importar `mgjexpert/facelove-conteudo` como **segundo projeto Vercel** (Framework: Other, Root Directory: raiz, Install Command: `npm ci`, sem Build Command e sem Output Directory). Production Branch: `main`. `vercel.json` fixa `framework: null` (preset Other) e reescreve `/health`, `/v1/catalog` e `/v1/media/:key` para `api/gateway.mjs`, que reutiliza `src/http/gateway.mjs` e `src/providers/mega.mjs`. O endpoint público só entrega catálogo e media com `Authorization: Bearer <MEDIA_GATEWAY_TOKEN>`; `/health` confirma apenas a configuração, sem testar a leitura da origem. Se o primeiro deploy usou o preset **Node.js**, altere-o para **Other** em Settings → Build and Deployment antes do redeploy. O preset Node.js arranca `src/server.mjs` e tenta ler `.private/ana-oliveira.manifest.json`, um ficheiro que não pode estar no Git.
 
 Criar **somente no projeto do gateway**, em Vercel Settings → Environment Variables → Production:
 

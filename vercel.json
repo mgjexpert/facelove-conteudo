@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "rewrites": [
     { "source": "/health", "destination": "/api/gateway?route=health" },
     { "source": "/v1/catalog", "destination": "/api/gateway?route=v1/catalog" },
