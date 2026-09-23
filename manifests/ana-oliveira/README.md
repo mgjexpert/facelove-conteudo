@@ -29,3 +29,5 @@ A key FaceLove é estável. O `externalId` pode mudar quando migramos de provide
 3. Gera uma versão sanitizada para este diretório.
 4. O frontend usa keys/metadata durante o desenvolvimento.
 5. Ingestão futura escreve os assets reais em Supabase.
+
+Execute `npm run manifest:local` com `MEGA_FOLDER_URL`, `MEGA_PHOTOS_FOLDER_ID` e `MEGA_VIDEOS_FOLDER_ID` definidos apenas no ambiente local. O script escolhe seis imagens e quatro MP4 e grava `.private/ana-oliveira.manifest.json`, ignorado pelo Git. O ficheiro `example.manifest.json` é apenas um exemplo sanitizado e não serve para resolver media real.

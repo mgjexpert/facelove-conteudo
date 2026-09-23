@@ -163,4 +163,10 @@ Transformar o PoC de streaming em um adapter reutilizável para o perfil de test
 - privacidade;
 - portabilidade entre providers.
 
+## Alpha 0.1 implementado
+
+Na branch `work/mega-provider`, o código em `src/http/` trata autenticação, Range e respostas HTTP, enquanto `src/providers/mega.mjs` conhece apenas o protocolo MEGA. `npm ci && npm test` valida o gateway com provider simulado. Configure as variáveis de `.env.example` localmente, execute `npm run manifest:local` e `npm run verify:live` para testar contra a origem autorizada. O manifest real fica em `.private/`; `npm run manifest:sanitize` gera o exemplo sem IDs de origem.
+
+O contrato de integração com o frontend está em [docs/PLAYBACK-CONTRACT.md](docs/PLAYBACK-CONTRACT.md). Google Drive segue o mesmo contrato, mas ainda não tem origem e Range validados.
+
 As instruções para GPT Work estão em `AGENTS.md` e `docs/GPT-WORK.md`.

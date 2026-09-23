@@ -5,28 +5,131 @@
     {
       "key": "ana-img-001",
       "provider": "mega",
-      "externalId": "SANITIZED_IMAGE_REFERENCE",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "image",
+      "mimeType": "image/png",
+      "title": "Fotografia 1",
+      "visibility": "public",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-img-002",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
       "mediaType": "image",
       "mimeType": "image/jpeg",
-      "title": "Momento",
+      "title": "Fotografia 2",
       "visibility": "public",
-      "tags": ["demo"],
       "metadata": {
-        "fixture": true
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-img-003",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "image",
+      "mimeType": "image/jpeg",
+      "title": "Fotografia 3",
+      "visibility": "public",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-img-004",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "image",
+      "mimeType": "image/jpeg",
+      "title": "Fotografia 4",
+      "visibility": "public",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-img-005",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "image",
+      "mimeType": "image/jpeg",
+      "title": "Fotografia 5",
+      "visibility": "access_link",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-img-006",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "image",
+      "mimeType": "image/jpeg",
+      "title": "Fotografia 6",
+      "visibility": "access_link",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
       }
     },
     {
       "key": "ana-video-001",
       "provider": "mega",
-      "externalId": "SANITIZED_VIDEO_REFERENCE",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
       "mediaType": "video",
       "mimeType": "video/mp4",
-      "title": "Vídeo",
-      "visibility": "access_link",
-      "tags": ["demo", "range-test"],
+      "title": "Vídeo 1",
+      "visibility": "public",
       "metadata": {
         "fixture": true,
-        "expectsRangeSupport": true
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-video-002",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "video",
+      "mimeType": "video/mp4",
+      "title": "Vídeo 2",
+      "visibility": "public",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-video-003",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "video",
+      "mimeType": "video/mp4",
+      "title": "Vídeo 3",
+      "visibility": "access_link",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
+      }
+    },
+    {
+      "key": "ana-video-004",
+      "provider": "mega",
+      "externalId": "LOCAL_REFERENCE_REQUIRED",
+      "mediaType": "video",
+      "mimeType": "video/mp4",
+      "title": "Vídeo 4",
+      "visibility": "access_link",
+      "metadata": {
+        "fixture": true,
+        "playableOnlyWithLocalManifest": true
       }
     }
   ]
