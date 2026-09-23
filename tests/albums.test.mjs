@@ -29,10 +29,10 @@ test('private albums isolate keys, select their nested folders and limit images/
 
 test('multi-space Vercel catalogue isolates albums and preserves Range seek', async () => {
   const token = 'test-internal-gateway-token-123456789'
-  const old = Object.fromEntries(['SUPABASE_URL','SUPABASE_SERVICE_ROLE_KEY','MEDIA_GATEWAY_TOKEN','MEGA_FOLDER_URL'].map(key => [key,process.env[key]]))
+  const old = Object.fromEntries(['SUPABASE_URL','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','MEDIA_GATEWAY_TOKEN','MEGA_FOLDER_URL'].map(key => [key,process.env[key]]))
   const previousFetch = globalThis.fetch
   process.env.SUPABASE_URL = 'https://db.invalid'
-  process.env.SUPABASE_SERVICE_ROLE_KEY = 'server-only-test-key'
+  process.env.SUPABASE_SECRET_KEY = 'sb_secret_server-only-test-key'
   process.env.MEDIA_GATEWAY_TOKEN = token
   delete process.env.MEGA_FOLDER_URL
   let discovered = 0
@@ -42,6 +42,8 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
   globalThis.fetch = async (input, options) => {
     const url = new URL(input)
     if (url.hostname !== 'db.invalid') return previousFetch(input, options)
+    assert.equal(options.headers.apikey, process.env.SUPABASE_SECRET_KEY)
+    assert.equal(options.headers.Authorization, undefined)
     const username = url.searchParams.get('username')?.split('.')[1]
     const profileId = url.searchParams.get('profile_id')?.split('.')[1]
     const spaceId = url.searchParams.get('space_id')?.split('.')[1]
