@@ -17,8 +17,8 @@ function json(res, status, payload) {
   res.end(JSON.stringify(payload))
 }
 function publicMetadata(asset) {
-  const { key, mediaType, mimeType, title, caption, visibility, thumbnailReference } = asset
-  return { key, mediaType, mimeType, title, caption, visibility, thumbnailReference }
+  const { key, mediaType, mimeType, title, caption, visibility, thumbnailReference, packId } = asset
+  return { key, mediaType, mimeType, title, caption, visibility, thumbnailReference, packId }
 }
 
 export function createGateway({ manifest, providers, token }) {
@@ -32,7 +32,7 @@ export function createGateway({ manifest, providers, token }) {
         return json(res, 401, { error: 'Autorização necessária' })
       }
       if (path === '/v1/catalog' && req.method === 'GET') {
-        return json(res, 200, { schemaVersion: manifest.schemaVersion, profile: manifest.profile, assets: manifest.assets.map(publicMetadata) })
+        return json(res, 200, { schemaVersion: manifest.schemaVersion, profile: manifest.profile, assets: manifest.assets.map(publicMetadata), packs: manifest.packs || [] })
       }
       if (path.startsWith('/v1/media/') && ['GET', 'HEAD'].includes(req.method)) {
         let key

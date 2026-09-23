@@ -14,10 +14,10 @@ Não colocar aqui:
 ## Convenção de keys
 
 ```text
-ana-img-001
-ana-img-002
-ana-video-001
-ana-video-002
+mega-img-001
+mega-img-050
+mega-video-001
+mega-video-005
 ```
 
 A key FaceLove é estável. O `externalId` pode mudar quando migramos de provider.
@@ -30,4 +30,4 @@ A key FaceLove é estável. O `externalId` pode mudar quando migramos de provide
 4. O frontend usa keys/metadata durante o desenvolvimento.
 5. Ingestão futura escreve os assets reais em Supabase.
 
-Execute `npm run manifest:local` com `MEGA_FOLDER_URL`, `MEGA_PHOTOS_FOLDER_ID` e `MEGA_VIDEOS_FOLDER_ID` definidos apenas no ambiente local. O script escolhe seis imagens e quatro MP4 e grava `.private/ana-oliveira.manifest.json`, ignorado pelo Git. O ficheiro `example.manifest.json` é apenas um exemplo sanitizado e não serve para resolver media real.
+Execute `npm run manifest:local` com `MEGA_FOLDER_URL`, `MEGA_PHOTOS_FOLDER_ID` e `MEGA_VIDEOS_FOLDER_ID` definidos apenas no ambiente local. O script escolhe **50 fotografias e 5 MP4**, organiza dois packs privados e grava `.private/ana-oliveira.manifest.json`, ignorado pelo Git. O ficheiro `example.manifest.json` é apenas um exemplo sanitizado e não serve para resolver media real. Para deploy, veja [VERCEL-GATEWAY.md](../../docs/VERCEL-GATEWAY.md).

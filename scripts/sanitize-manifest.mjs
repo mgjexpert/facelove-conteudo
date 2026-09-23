@@ -12,8 +12,10 @@ const sanitized = {
     mimeType: asset.mimeType,
     title: asset.title,
     visibility: asset.visibility,
+    packId: asset.packId,
     metadata: { fixture: true, playableOnlyWithLocalManifest: true }
-  }))
+  })),
+  packs: local.packs
 }
 await writeFile('manifests/ana-oliveira/example.manifest.json', JSON.stringify(sanitized, null, 2) + '\n')
 console.log(`Exemplo sanitizado: ${sanitized.assets.length} entradas sem referências de origem.`)

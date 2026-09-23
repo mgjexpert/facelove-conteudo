@@ -9,7 +9,7 @@ O gateway Node serve **apenas ao servidor frontend**, com `Authorization: Bearer
 3. `GET /api/media/:key` no frontend transmite o fluxo autorizado ao navegador e encaminha `Range`. A URL do provider não é devolvida.
 4. O gateway obtém metadata do provider, calcula a faixa e abre o stream com `start`/`end` inclusivos.
 
-O catálogo `/v1/catalog` fornece apenas `key`, `mediaType`, `mimeType`, `title`, `caption`, `visibility` e `thumbnailReference`. Não devolve `externalId`, URL de origem nem chaves.
+O catálogo `/v1/catalog` fornece apenas `key`, `mediaType`, `mimeType`, `title`, `caption`, `visibility`, `thumbnailReference`, `packId` e os packs com IDs de assets internos. Não devolve `externalId`, URL de origem nem chaves. Os 55 assets do primeiro manifest MEGA têm visibilidade `access_link`; a identificação do pack não concede playback.
 
 | Pedido ao gateway | Resposta | Headers relevantes |
 | --- | --- | --- |
@@ -34,3 +34,5 @@ MEDIA_GATEWAY_TOKEN=<segredo-servidor>
 ```
 
 Os valores reais e o manifest de referência ficam fora do Git. Ao substituir MEGA por Drive, R2 ou Mux, preservar o `key` FaceLove, trocar o adapter e atualizar a referência interna.
+
+Para produção, `MEDIA_GATEWAY_URL` aponta para o **segundo projeto Vercel** do gateway por HTTPS. O frontend valida o convite e a visibilidade do asset antes de pedir o stream ao gateway. O token Bearer passa apenas de servidor para servidor; consulte [VERCEL-GATEWAY.md](VERCEL-GATEWAY.md). O convite Alpha é único e controlado por variáveis de ambiente, sem revogação individual, auditoria ou RLS. É necessário evoluir Auth e dados antes de abrir a plataforma a contas reais.
