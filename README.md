@@ -70,7 +70,7 @@ fixtures/
 
 ## Manifest
 
-O laboratório entrega ao frontend/Supabase manifests sanitizados.
+O laboratório pode entregar ao frontend/Supabase manifests sanitizados. O gateway Vercel descobre agora o catálogo diretamente na pasta MEGA; o manifest manual continua disponível para testes técnicos.
 
 Exemplo:
 
@@ -165,7 +165,7 @@ Transformar o PoC de streaming em um adapter reutilizável para o perfil de test
 
 ## Alpha 0.1 implementado
 
-Em `main`, o código em `src/http/` trata autenticação, Range e respostas HTTP, enquanto `src/providers/mega.mjs` conhece apenas o protocolo MEGA. `npm ci && npm test` valida o gateway com provider simulado. Configure as variáveis de `.env.example` localmente, execute `npm run manifest:local` e `npm run verify:live` para testar contra a origem autorizada. O manifest real fica em `.private/`; `npm run manifest:sanitize` gera o exemplo sem IDs de origem.
+Em `main`, o código em `src/http/` trata autenticação, Range e respostas HTTP, enquanto `src/providers/mega.mjs` conhece apenas o protocolo MEGA. `npm ci && npm test` valida o gateway com provider simulado. Para o piloto Ana, basta configurar `MEGA_FOLDER_URL` e `MEDIA_GATEWAY_TOKEN` no gateway Vercel; o catálogo privado de até 50 fotos e 5 MP4 é gerado automaticamente da pasta e subpastas. `npm run manifest:local` e `npm run manifest:sanitize` continuam como ferramentas opcionais de laboratório, mantendo o manifest manual em `.private/` e o exemplo Git sem IDs de origem.
 
 O contrato de integração com o frontend está em [docs/PLAYBACK-CONTRACT.md](docs/PLAYBACK-CONTRACT.md). Google Drive segue o mesmo contrato, mas ainda não tem origem e Range validados.
 
@@ -173,6 +173,6 @@ As instruções para GPT Work estão em `AGENTS.md` e `docs/GPT-WORK.md`.
 
 ## Primeiro pack reservado e deploy Vercel
 
-`scripts/build-local-manifest.mjs` seleciona o primeiro pack com **50 fotografias e 5 vídeos MP4** da origem MEGA configurada e atribui `access_link` a todos. O manifest privado contém IDs de origem e permanece em `.private/`; o exemplo em Git contém apenas placeholders. `api/gateway.mjs` reutiliza o gateway Node, incluindo HTTP Range e seek, como Function num segundo projeto Vercel. Consulte [docs/VERCEL-GATEWAY.md](docs/VERCEL-GATEWAY.md) antes de configurar o deploy.
+`src/catalog/mega.mjs` seleciona automaticamente até **50 fotografias e 5 vídeos MP4** da pasta MEGA configurada e atribui `access_link` a todos. As referências de origem permanecem em memória no servidor; o catálogo HTTP não as devolve. O manifest manual gerado por `scripts/build-local-manifest.mjs` é opcional, permanece em `.private/`, e o exemplo em Git contém apenas placeholders. `api/gateway.mjs` reutiliza o gateway Node, incluindo HTTP Range e seek, como Function num segundo projeto Vercel. Consulte [docs/VERCEL-GATEWAY.md](docs/VERCEL-GATEWAY.md) antes de configurar o deploy.
 
 O Google Drive mantém o mesmo contrato de provider, mas o adapter Drive ainda não foi implementado nem validado para Range. A sua ativação exige autorização, inspeção, streaming e testes próprios no laboratório.

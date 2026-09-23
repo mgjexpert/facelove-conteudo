@@ -56,6 +56,24 @@ export class MegaProvider {
       }))
   }
 
+  async listMedia(mediaType) {
+    const { files } = await this.#load()
+    return [...files.values()]
+      .filter(file => {
+        const mime = mimeForFilename(file.name)
+        return mediaType === 'video' ? mime === 'video/mp4' : mime.startsWith('image/')
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt', { numeric: true }) ||
+        String(a.downloadId?.[1] || a.nodeId).localeCompare(String(b.downloadId?.[1] || b.nodeId)))
+      .map(file => ({
+        externalId: file.downloadId?.[1] || file.nodeId,
+        mediaType,
+        mimeType: mimeForFilename(file.name),
+        size: file.size,
+        filename: file.name
+      }))
+  }
+
   async inspect(reference) {
     const { files } = await this.#load()
     const file = files.get(reference.externalId)
