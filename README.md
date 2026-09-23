@@ -176,3 +176,7 @@ As instruções para GPT Work estão em `AGENTS.md` e `docs/GPT-WORK.md`.
 `src/catalog/mega.mjs` seleciona automaticamente até **50 fotografias e 5 vídeos MP4** da pasta MEGA configurada e atribui `access_link` a todos. As referências de origem permanecem em memória no servidor; o catálogo HTTP não as devolve. O manifest manual gerado por `scripts/build-local-manifest.mjs` é opcional, permanece em `.private/`, e o exemplo em Git contém apenas placeholders. `api/gateway.mjs` reutiliza o gateway Node, incluindo HTTP Range e seek, como Function num segundo projeto Vercel. Consulte [docs/VERCEL-GATEWAY.md](docs/VERCEL-GATEWAY.md) antes de configurar o deploy.
 
 O Google Drive mantém o mesmo contrato de provider, mas o adapter Drive ainda não foi implementado nem validado para Range. A sua ativação exige autorização, inspeção, streaming e testes próprios no laboratório.
+
+## Catálogo Spaces multiálbum
+
+O gateway Vercel consulta perfis, álbuns e origens por Space no Supabase com uma chave de servidor. `GET /v1/catalog?space=emily` e `GET /v1/media/<key>?space=emily` usam o mesmo streaming Range; apenas o frontend autenticado deve chamar estes endpoints. `GET /v1/access?hash=<sha256>` e `POST /v1/access?hash=<sha256>` validam e resgatam convites por álbum. A variável `MEGA_FOLDER_URL` é uma opção de compatibilidade para o piloto antigo caso não haja Supabase configurado. A configuração de produção e a gestão de convites estão no repositório frontend em `docs/SPACES-PRODUCTION.md`.

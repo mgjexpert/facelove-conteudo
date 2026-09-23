@@ -4,6 +4,7 @@ import { mimeForFilename } from './contract.mjs'
 export class MegaProvider {
   provider = 'mega'
   #folderUrl
+  #selectedFolderId
   #files
   #loading
 
@@ -14,7 +15,10 @@ export class MegaProvider {
       throw new Error('É necessário um link de pasta pública MEGA')
     }
     this.#folderUrl = parsed.origin + parsed.pathname + '#' + parsed.hash.slice(1).split('/folder/')[0]
+    this.#selectedFolderId = parsed.hash.match(/\/folder\/([a-zA-Z0-9_-]+)/)?.[1] || null
   }
+
+  get selectedFolderId() { return this.#selectedFolderId }
 
   async #load() {
     if (this.#files) return this.#files
