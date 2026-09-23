@@ -18,6 +18,20 @@
       "type": "string",
       "format": "date-time"
     },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "mediaType", "assetKeys"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "mediaType": { "enum": ["image", "video"] },
+          "assetKeys": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+        }
+      }
+    },
     "assets": {
       "type": "array",
       "items": {
@@ -43,6 +57,7 @@
           },
           "mimeType": { "type": "string" },
           "title": { "type": "string" },
+          "packId": { "type": "string" },
           "caption": { "type": "string" },
           "width": { "type": "integer", "minimum": 1 },
           "height": { "type": "integer", "minimum": 1 },

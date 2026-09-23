@@ -8,7 +8,7 @@ Este repositório não é o produto visual principal. A aplicação fica em:
 
 Aqui validamos como fotos e vídeos são descobertos, descritos, reproduzidos e entregues ao FaceLove através de um contrato estável, independentemente do fornecedor.
 
-> Estado atual: **media lab / Spaces Alpha 0.1**
+> Estado atual: **media lab / Spaces Alpha — gateway Vercel preparado**
 
 ## Objetivo imediato
 
@@ -163,4 +163,16 @@ Transformar o PoC de streaming em um adapter reutilizável para o perfil de test
 - privacidade;
 - portabilidade entre providers.
 
+## Alpha 0.1 implementado
+
+Em `main`, o código em `src/http/` trata autenticação, Range e respostas HTTP, enquanto `src/providers/mega.mjs` conhece apenas o protocolo MEGA. `npm ci && npm test` valida o gateway com provider simulado. Configure as variáveis de `.env.example` localmente, execute `npm run manifest:local` e `npm run verify:live` para testar contra a origem autorizada. O manifest real fica em `.private/`; `npm run manifest:sanitize` gera o exemplo sem IDs de origem.
+
+O contrato de integração com o frontend está em [docs/PLAYBACK-CONTRACT.md](docs/PLAYBACK-CONTRACT.md). Google Drive segue o mesmo contrato, mas ainda não tem origem e Range validados.
+
 As instruções para GPT Work estão em `AGENTS.md` e `docs/GPT-WORK.md`.
+
+## Primeiro pack reservado e deploy Vercel
+
+`scripts/build-local-manifest.mjs` seleciona o primeiro pack com **50 fotografias e 5 vídeos MP4** da origem MEGA configurada e atribui `access_link` a todos. O manifest privado contém IDs de origem e permanece em `.private/`; o exemplo em Git contém apenas placeholders. `api/gateway.mjs` reutiliza o gateway Node, incluindo HTTP Range e seek, como Function num segundo projeto Vercel. Consulte [docs/VERCEL-GATEWAY.md](docs/VERCEL-GATEWAY.md) antes de configurar o deploy.
+
+O Google Drive mantém o mesmo contrato de provider, mas o adapter Drive ainda não foi implementado nem validado para Range. A sua ativação exige autorização, inspeção, streaming e testes próprios no laboratório.
