@@ -36,6 +36,7 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
   process.env.MEDIA_GATEWAY_TOKEN = token
   delete process.env.MEGA_FOLDER_URL
   let discovered = 0
+  let audited = 0
   const bytes = Buffer.alloc(2 * 1024 * 1024, 8)
   bytes[1048576] = 42
   globalThis.fetch = async (input, options) => {
@@ -47,10 +48,13 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
     const albumId = url.searchParams.get('album_id')
     const table = url.pathname.split('/').at(-1)
     if (table === 'resolve_login_email') return new Response(JSON.stringify('verified@example.org'), {status:200})
+    if (table === 'redeem_space_link') return new Response(JSON.stringify([{link_id:'link-1',album_id:'album-space-emily',expires_at:null}]), {status:200})
+    if (table === 'access_events') { audited++; return new Response('',{status:201}) }
     const data = table === 'profiles' ? [{id:username}] :
       table === 'spaces' ? [{id:`space-${profileId}`}] :
       table === 'albums' ? [{id:`album-${spaceId}`,title:'Fotos',media_type:'image',visibility:'access_link'}] :
-      table === 'media_sources' ? [{album_id:albumId.match(/album-[^,)]+/)?.[0],provider:'mega',source_url:'https://mega.nz/folder/AAAAAAAA#BBBBBBBB/folder/XXXXXXXX'}] : []
+      table === 'media_sources' ? [{album_id:albumId.match(/album-[^,)]+/)?.[0],provider:'mega',source_url:'https://mega.nz/folder/AAAAAAAA#BBBBBBBB/folder/XXXXXXXX'}] :
+      table === 'access_links' ? [{id:'link-1',album_id:'album-space-emily',expires_at:null,max_uses:null,uses_count:0,revoked_at:null}] : []
     return new Response(JSON.stringify(data), {status:200,headers:{'content-type':'application/json'}})
   }
   const provider = () => ({ selectedFolderId:'XXXXXXXX', async listFolder() {
@@ -68,6 +72,10 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
     const headers = {Authorization:`Bearer ${token}`}
     const identity = await (await previousFetch(base+'v1/identity&handle=emily',{headers})).json()
     assert.equal(identity.email,'verified@example.org')
+    const hash = 'a'.repeat(64)
+    const invitation = await previousFetch(base+`v1/access&hash=${hash}`,{method:'POST',headers})
+    assert.equal(invitation.status,200)
+    assert.equal(audited,1)
     const emily = await (await previousFetch(base+'v1/catalog&space=emily',{headers})).json()
     const jade = await (await previousFetch(base+'v1/catalog&space=jade',{headers})).json()
     assert.equal(emily.profile,'emily')

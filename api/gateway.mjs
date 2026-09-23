@@ -48,6 +48,13 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
     if (!response.ok) throw new Error('Falha na ativação do convite')
     const redeemed = await response.json()
     if (!redeemed.length) { res.writeHead(403); return res.end() }
+    try {
+      const audit = await fetch(new URL('/rest/v1/access_events', process.env.SUPABASE_URL), {
+        method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_link_id: redeemed[0].link_id, event_type: 'activated' }), cache: 'no-store'
+      })
+      if (!audit.ok) console.error('Não foi possível registar ativação de convite')
+    } catch { console.error('Não foi possível registar ativação de convite') }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
     return res.end(JSON.stringify({ albumId: link.album_id, expiresAt: link.expires_at }))
   }
