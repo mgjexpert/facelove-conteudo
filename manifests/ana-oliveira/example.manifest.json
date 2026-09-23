@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "profile": "anaoliveira",
+  "assets": [
+    {
+      "key": "ana-img-001",
+      "provider": "mega",
+      "externalId": "SANITIZED_IMAGE_REFERENCE",
+      "mediaType": "image",
+      "mimeType": "image/jpeg",
+      "title": "Momento",
+      "visibility": "public",
+      "tags": ["demo"],
+      "metadata": {
+        "fixture": true
+      }
+    },
+    {
+      "key": "ana-video-001",
+      "provider": "mega",
+      "externalId": "SANITIZED_VIDEO_REFERENCE",
+      "mediaType": "video",
+      "mimeType": "video/mp4",
+      "title": "Vídeo",
+      "visibility": "access_link",
+      "tags": ["demo", "range-test"],
+      "metadata": {
+        "fixture": true,
+        "expectsRangeSupport": true
+      }
+    }
+  ]
+}
