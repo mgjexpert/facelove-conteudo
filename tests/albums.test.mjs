@@ -46,6 +46,7 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
     const spaceId = url.searchParams.get('space_id')?.split('.')[1]
     const albumId = url.searchParams.get('album_id')
     const table = url.pathname.split('/').at(-1)
+    if (table === 'resolve_login_email') return new Response(JSON.stringify('verified@example.org'), {status:200})
     const data = table === 'profiles' ? [{id:username}] :
       table === 'spaces' ? [{id:`space-${profileId}`}] :
       table === 'albums' ? [{id:`album-${spaceId}`,title:'Fotos',media_type:'image',visibility:'access_link'}] :
@@ -62,8 +63,11 @@ test('multi-space Vercel catalogue isolates albums and preserves Range seek', as
     await new Promise(resolve => server.once('listening',resolve))
     const base = `http://127.0.0.1:${server.address().port}/api/gateway?route=`
     assert.equal((await previousFetch(base+'v1/catalog&space=emily')).status,401)
+    assert.equal((await previousFetch(base+'v1/identity&handle=emily')).status,401)
     assert.equal(discovered,0)
     const headers = {Authorization:`Bearer ${token}`}
+    const identity = await (await previousFetch(base+'v1/identity&handle=emily',{headers})).json()
+    assert.equal(identity.email,'verified@example.org')
     const emily = await (await previousFetch(base+'v1/catalog&space=emily',{headers})).json()
     const jade = await (await previousFetch(base+'v1/catalog&space=jade',{headers})).json()
     assert.equal(emily.profile,'emily')

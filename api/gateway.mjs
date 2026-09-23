@@ -52,6 +52,22 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
     return res.end(JSON.stringify({ albumId: link.album_id, expiresAt: link.expires_at }))
   }
 
+  async function identityRequest(req, res) {
+    if (req.method !== 'GET') { res.writeHead(405); return res.end() }
+    const handle = new URL(req.url, 'http://localhost').searchParams.get('handle') || ''
+    if (!/^[a-z0-9_]{3,32}$/.test(handle)) { res.writeHead(400); return res.end() }
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!key || !process.env.SUPABASE_URL) { res.writeHead(503); return res.end() }
+    const response = await fetch(new URL('/rest/v1/rpc/resolve_login_email', process.env.SUPABASE_URL), {
+      method: 'POST', headers: { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_username: handle }), cache: 'no-store'
+    })
+    if (!response.ok) throw new Error('Falha ao verificar identidade')
+    const email = await response.json()
+    res.writeHead(200, { 'Content-Type':'application/json', 'Cache-Control':'no-store' })
+    return res.end(JSON.stringify({ email: typeof email === 'string' ? email : null }))
+  }
+
   async function loadSpace(space) {
     const profiles = await dbRows('profiles', `username=eq.${space}&select=id`)
     if (profiles.length !== 1) throw new Error('Space desconhecido')
@@ -96,7 +112,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
   return async function handler(req, res) {
     const value = req.query?.route || new URL(req.url, 'http://localhost').searchParams.get('route')
     const path = Array.isArray(value) ? '' : value
-    if (typeof path !== 'string' || !/^(health|v1\/catalog|v1\/access|v1\/media\/[a-zA-Z0-9_-]+)$/.test(path)) {
+    if (typeof path !== 'string' || !/^(health|v1\/catalog|v1\/access|v1\/identity|v1\/media\/[a-zA-Z0-9_-]+)$/.test(path)) {
       res.writeHead(404, { 'Cache-Control': 'no-store' })
       return res.end()
     }
@@ -115,6 +131,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
     }
     try {
       if (path === 'v1/access') return await accessRequest(req, res)
+      if (path === 'v1/identity') return await identityRequest(req, res)
       const space = new URL(req.url, 'http://localhost').searchParams.get('space') || 'anaoliveira'
       if (!/^[a-z0-9_]{3,32}$/.test(space)) { res.writeHead(400); return res.end() }
       const gateway = await getServer(space)

@@ -5,6 +5,7 @@
     { "source": "/health", "destination": "/api/gateway?route=health" },
     { "source": "/v1/catalog", "destination": "/api/gateway?route=v1/catalog" },
     { "source": "/v1/access", "destination": "/api/gateway?route=v1/access" },
+    { "source": "/v1/identity", "destination": "/api/gateway?route=v1/identity" },
     { "source": "/v1/media/:key", "destination": "/api/gateway?route=v1/media/:key" }
   ],
   "functions": { "api/gateway.mjs": { "maxDuration": 300 } }
