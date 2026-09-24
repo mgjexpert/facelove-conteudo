@@ -20,11 +20,11 @@ test('private albums isolate keys, select their nested folders and limit images/
   const catalog = await buildAlbumCatalog({ profile: 'emily', albums, providers: {
     'images-album': provider('only-images'), 'videos-album': provider('only-videos')
   } })
-  assert.equal(catalog.assets.length, 55)
-  assert.deepEqual(catalog.packs.map(pack => pack.assetKeys.length), [50, 5])
+  assert.equal(catalog.assets.length, 60)
+  assert.deepEqual(catalog.packs.map(pack => pack.assetKeys.length), [53, 7])
   assert.deepEqual(calls, [['only-images', 'image'], ['only-videos', 'video']])
   assert.equal(catalog.assets[0].externalId, 'image-0')
-  assert.notEqual(catalog.assets[0].key, catalog.assets[50].key)
+  assert.notEqual(catalog.assets[0].key, catalog.assets[53].key)
 })
 
 test('multi-space Vercel catalogue isolates albums and preserves Range seek', async () => {

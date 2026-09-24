@@ -50,7 +50,8 @@ export class MegaProvider {
     if (!folder) throw new Error('Pasta MEGA não encontrada')
     return (folder.children || [])
       .filter(file => !file.directory && mimeForFilename(file.name).startsWith(mediaType + '/'))
-      .sort((a, b) => a.name.localeCompare(b.name, 'pt', { numeric: true }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt', { numeric: true }) ||
+        String(a.downloadId?.[1] || a.nodeId).localeCompare(String(b.downloadId?.[1] || b.nodeId)))
       .map(file => ({
         externalId: file.downloadId?.[1] || file.nodeId,
         mediaType,

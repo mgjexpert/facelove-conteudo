@@ -11,8 +11,8 @@ export async function buildAlbumCatalog({ profile, albums, providers }) {
     ))).flat()
     // A pack can be configured as images, videos, or a mixed album.
     const selected = [
-      ...listed.filter(file => file.mediaType === 'image').slice(0, 50),
-      ...listed.filter(file => file.mediaType === 'video' && file.mimeType === 'video/mp4').slice(0, 5)
+      ...listed.filter(file => file.mediaType === 'image'),
+      ...listed.filter(file => file.mediaType === 'video' && file.mimeType === 'video/mp4')
     ]
     const assetKeys = []
     selected.forEach((file, index) => {

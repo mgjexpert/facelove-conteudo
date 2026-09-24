@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto'
+import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createGateway } from '../src/http/gateway.mjs'
 import { buildMegaCatalog } from '../src/catalog/mega.mjs'
 import { MegaProvider } from '../src/providers/mega.mjs'
@@ -10,6 +10,9 @@ const dbHeaders = () => {
   const key = serverKey()
   return { apikey: key, ...(key?.startsWith('sb_secret_') ? {} : { Authorization: `Bearer ${key}` }) }
 }
+const tiers = { guest: [30, 10], vip: [100, 20], vip_premium: [200, 50], all_in: [null, null] }
+const durations = { '5m': 300, '12h': 43200, '24h': 86400, '7d': 604800, '1mo': 2592000, lifetime: null }
+const validId = value => /^[a-f0-9-]{36}$/.test(value || '')
 
 function matchesToken(value, token) {
   if (!token || token.length < 24 || !value) return false
@@ -35,14 +38,19 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
   async function accessRequest(req, res) {
     const hash = new URL(req.url, 'http://localhost').searchParams.get('hash')
     if (!hash || !/^[a-f0-9]{64}$/.test(hash)) { res.writeHead(400); return res.end() }
-    const links = await dbRows('access_links', `token_hash=eq.${hash}&select=id,album_id,expires_at,max_uses,uses_count,revoked_at`)
+    const links = await dbRows('access_links', `token_hash=eq.${hash}&select=id,album_id,space_id,tier,image_limit,video_limit,duration_seconds,activated_at,expires_at,max_uses,uses_count,revoked_at`)
     const link = links[0]
     if (!link) { res.writeHead(404); return res.end() }
-    const active = !link.revoked_at && (!link.expires_at || Date.parse(link.expires_at) > Date.now())
+    const durationEnd = link.duration_seconds && link.activated_at
+      ? new Date(Date.parse(link.activated_at) + link.duration_seconds * 1000).toISOString() : null
+    const expiresAt = [link.expires_at, durationEnd].filter(Boolean).sort()[0] || null
+    const active = !link.revoked_at && (!expiresAt || Date.parse(expiresAt) > Date.now())
     const available = active && (link.max_uses === null || link.uses_count < link.max_uses)
     if (req.method === 'GET') {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
-      return res.end(JSON.stringify({ albumId: link.album_id, expiresAt: link.expires_at, active, available }))
+      return res.end(JSON.stringify({ albumId: link.album_id, spaceId: link.space_id,
+        tier: link.tier, imageLimit: link.image_limit, videoLimit: link.video_limit,
+        expiresAt, active, available, revoked: Boolean(link.revoked_at) }))
     }
     if (req.method !== 'POST' || !available) { res.writeHead(403); return res.end() }
     const key = serverKey()
@@ -61,7 +69,58 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
       if (!audit.ok) console.error('Não foi possível registar ativação de convite')
     } catch { console.error('Não foi possível registar ativação de convite') }
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
-    return res.end(JSON.stringify({ albumId: link.album_id, expiresAt: link.expires_at }))
+    return res.end(JSON.stringify({ albumId: link.album_id, spaceId: link.space_id,
+      tier: link.tier, imageLimit: link.image_limit, videoLimit: link.video_limit,
+      expiresAt: redeemed[0].expires_at }))
+  }
+
+  async function invitationRequest(req, res, path) {
+    const url = new URL(req.url, 'http://localhost')
+    const spaceId = url.searchParams.get('space')
+    if (!validId(spaceId)) { res.writeHead(400); return res.end() }
+    if (path === 'v1/invites' && req.method === 'GET') {
+      const links = await dbRows('access_links', `space_id=eq.${spaceId}&select=id,label,tier,image_limit,video_limit,duration_seconds,activated_at,expires_at,max_uses,uses_count,revoked_at,created_at&order=created_at.desc`)
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+      return res.end(JSON.stringify(links))
+    }
+    if (req.method !== 'POST' || !['v1/invites', 'v1/invites/revoke'].includes(path)) {
+      res.writeHead(405); return res.end()
+    }
+    let input = ''
+    for await (const chunk of req) {
+      input += chunk.toString()
+      if (input.length > 2048) { res.writeHead(413); return res.end() }
+    }
+    let data
+    try { data = JSON.parse(input) } catch { res.writeHead(400); return res.end() }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) { res.writeHead(400); return res.end() }
+    if (path === 'v1/invites/revoke') {
+      if (!validId(data.id)) { res.writeHead(400); return res.end() }
+      const target = new URL('/rest/v1/access_links', process.env.SUPABASE_URL)
+      target.searchParams.set('id', `eq.${data.id}`)
+      target.searchParams.set('space_id', `eq.${spaceId}`)
+      const response = await fetch(target, { method: 'PATCH', headers: { ...dbHeaders(), 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ revoked_at: new Date().toISOString() }), cache: 'no-store' })
+      if (!response.ok) throw new Error('Falha ao revogar convite')
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+      return res.end(JSON.stringify({ revoked: (await response.json()).length === 1 }))
+    }
+    if (!Object.hasOwn(tiers, data.tier) || !Object.hasOwn(durations, data.duration) ||
+      !Number.isSafeInteger(data.maxUses) || data.maxUses < 1 || data.maxUses > 100 ||
+      typeof data.label !== 'string' || data.label.length > 100) {
+      res.writeHead(400); return res.end()
+    }
+    const spaces = await dbRows('spaces', `id=eq.${spaceId}&status=eq.published&select=id`)
+    if (spaces.length !== 1) { res.writeHead(404); return res.end() }
+    const token = randomBytes(32).toString('base64url')
+    const target = new URL('/rest/v1/access_links', process.env.SUPABASE_URL)
+    const response = await fetch(target, { method: 'POST', headers: { ...dbHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ space_id: spaceId, token_hash: createHash('sha256').update(token).digest('hex'),
+        label: data.label, tier: data.tier, image_limit: tiers[data.tier][0], video_limit: tiers[data.tier][1],
+        duration_seconds: durations[data.duration], max_uses: data.maxUses }), cache: 'no-store' })
+    if (!response.ok) throw new Error('Falha ao criar convite')
+    res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
+    return res.end(JSON.stringify({ token }))
   }
 
   async function identityRequest(req, res) {
@@ -124,7 +183,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
   return async function handler(req, res) {
     const value = req.query?.route || new URL(req.url, 'http://localhost').searchParams.get('route')
     const path = Array.isArray(value) ? '' : value
-    if (typeof path !== 'string' || !/^(health|v1\/catalog|v1\/access|v1\/identity|v1\/media\/[a-zA-Z0-9_-]+)$/.test(path)) {
+    if (typeof path !== 'string' || !/^(health|v1\/catalog|v1\/access|v1\/identity|v1\/invites(?:\/revoke)?|v1\/media\/[a-zA-Z0-9_-]+)$/.test(path)) {
       res.writeHead(404, { 'Cache-Control': 'no-store' })
       return res.end()
     }
@@ -144,6 +203,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
     try {
       if (path === 'v1/access') return await accessRequest(req, res)
       if (path === 'v1/identity') return await identityRequest(req, res)
+      if (path.startsWith('v1/invites')) return await invitationRequest(req, res, path)
       const space = new URL(req.url, 'http://localhost').searchParams.get('space') || 'anaoliveira'
       if (!/^[a-z0-9_]{3,32}$/.test(space)) { res.writeHead(400); return res.end() }
       const gateway = await getServer(space)
