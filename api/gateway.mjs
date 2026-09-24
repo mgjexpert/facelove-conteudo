@@ -106,7 +106,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
       return res.end(JSON.stringify({ revoked: (await response.json()).length === 1 }))
     }
     if (!Object.hasOwn(tiers, data.tier) || !Object.hasOwn(durations, data.duration) ||
-      !Number.isSafeInteger(data.maxUses) || data.maxUses < 1 || data.maxUses > 100 ||
+      (data.duration !== 'lifetime' && (!Number.isSafeInteger(data.maxUses) || data.maxUses < 1 || data.maxUses > 100)) ||
       typeof data.label !== 'string' || data.label.length > 100) {
       res.writeHead(400); return res.end()
     }
@@ -117,7 +117,7 @@ export function createVercelHandler(providerFactory = folderUrl => new MegaProvi
     const response = await fetch(target, { method: 'POST', headers: { ...dbHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ space_id: spaceId, token_hash: createHash('sha256').update(token).digest('hex'),
         label: data.label, tier: data.tier, image_limit: tiers[data.tier][0], video_limit: tiers[data.tier][1],
-        duration_seconds: durations[data.duration], max_uses: data.maxUses }), cache: 'no-store' })
+        duration_seconds: durations[data.duration], max_uses: data.duration === 'lifetime' ? null : data.maxUses }), cache: 'no-store' })
     if (!response.ok) throw new Error('Falha ao criar convite')
     res.writeHead(201, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' })
     return res.end(JSON.stringify({ token }))

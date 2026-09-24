@@ -51,6 +51,10 @@ test('private Space invitations require backend authentication and enforce activ
     assert.equal(created[0].duration_seconds,300)
     assert.equal(created[0].max_uses,1)
     assert.equal(JSON.stringify(created).includes(invitation),false)
+    const lifetime = await originalFetch(`${base}v1/invites&space=${space}`,{method:'POST',headers,
+      body:JSON.stringify({ tier:'all_in',duration:'lifetime',maxUses:null,label:'Acesso permanente' })})
+    assert.equal(lifetime.status,201)
+    assert.equal(created[1].max_uses,null)
     const list = await (await originalFetch(`${base}v1/invites&space=${space}`,{headers})).json()
     assert.equal(list.length,1)
     assert.equal(JSON.stringify(list).includes('token_hash'),false)
